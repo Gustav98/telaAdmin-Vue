@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from './views/Login.vue'
+import TabelaPacientes from './components/TabelaPacientes'
 
 Vue.use(Router)
 
@@ -11,7 +12,13 @@ export default new Router({
         {
             path: '/',
             name: 'home',
-            redirect: Login
+            component: Login
+          },
+
+          {
+            path: '/listagem-pacientes',
+            name: 'listagem-pacientes',
+            component: TabelaPacientes
           },
     ]
 })

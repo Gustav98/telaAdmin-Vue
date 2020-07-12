@@ -28,16 +28,16 @@
                 <v-card-text>
                     <v-form
                         ref="form"
-                        v-model="valid"
                         class="form-login"
+                        v-model="valid"
                     >
                     <v-text-field
                         v-model="email"
                         :rules="emailRules"
-                        placeholder="Insira seu e-mail"
-                        prepend-inner-icon="mdi-account"
+                        label="E-mail"
+                        prepend-inner-icon="mdi-email"
                         required
-                        solo
+                        outlined
                     ></v-text-field>
 
                     <v-text-field
@@ -49,38 +49,25 @@
                         autocomplete="disabled"
                         spellcheck="false"
                         autocapitalize="false"
-                        placeholder="Insira sua senha"
-                        solo
+                        label="Senha"
+                        outlined
                         required
                     ></v-text-field>
                     </v-form>
-                    <v-alert
-                          v-model="err"
-                          v-if="this.err"
-                          type="error"
-                          transition="scale-transition"
-                          outlined
-                          class="mt-3"
-                      >
-                          e-mail ou senha errada
-                      </v-alert>
+                    
                 </v-card-text>
 
                 <v-card-actions>
-                    <v-row align="center">
-                        <v-col cols="12" sm="12">
-                            <div class="text-center">
-                                <v-btn
-                                    :disabled="!valid"
-                                    rounded
-                                    large
-                                    color="primary"
-                                    @click="validate"
-                                >
-                                    Login
-                                </v-btn>
-                            </div>
-                        </v-col>
+                    <v-row align="center" class="btn-login">
+                        <v-btn
+                            :disabled="!valid"
+                            @click="auth"
+                            rounded
+                            large
+                            color="primary"
+                        >
+                            Entrar
+                        </v-btn>
                     </v-row>
                 </v-card-actions>
 
@@ -93,52 +80,66 @@
 </template>
 
 <script>
+import AcessoMedico from "../services/login-medico";
+import Vue from 'vue';
+
 export default {
     name: 'login',
 
     data: () => ({
         valid: true,
-        err: false,
         email: '',
         emailRules: [
-            v => !! v || 'Por favor, insira o e-mail',
-            v => /.+@.+\..+/.test(v) || 'O E-mail deve ser válido'
+            v => !!v || 'Por favor, insira o Email.',
+            v => /.+@.+\..+/.test(v) || 'O Email deve ser válido'
         ],
         password: '',
         passwordRules: [
-            v => !! v || 'Por favor, insira a senha'
-        ]
+            v => !!v || 'Por favor, insira a senha.'
+        ],
+        
     }),
 
     methods: {
-      validate () {
-        this.$refs.form.validate()
+      auth () {
+        if (this.$refs.form.validate()){
+          const login = {
+            email : this.email,
+            senha : this.password
+          }
+          AcessoMedico.acesso(login).then(response => {
+              var token = response.data.data.token;
+              localStorage.setItem('token', token);
+              this.$router.push({ path: '/listagem-pacientes' });
+          }).catch(error => {
+              console.log(error);
+              Vue.toasted.error('Falha ao tentar efetuar o login', { theme: 'bubble' });
+              this.$router.push({ path: "/" })
+          })
+        }
       },
-    },
-
-    watch: {
-        password () {
-            this.err = false;
-        },
-  },
-
-}
+    }
+  }
 </script>
 
 <style>
+/*Fundo da tela*/
 .bg-login-form{
   background: radial-gradient(ellipse at center,  #E3F2FD 1%,#BBDEFB 100%);
   height:calc(100vh);
   width:100%;
 }
+/* Card formulario */
 .card-login{
   border-radius: 10px !important;
 }
   .form-login{
-      padding: 4px 18px;
+      margin: 8px 32px
   }
   .v-card__text {
-    height: 190px;
+    height: 200px;
+    margin-top: 8px;
+    padding: 16px !important;
 }
   .form-logo{
     display: flex;
@@ -146,12 +147,31 @@ export default {
     padding: 14px;
     background-color: #17355D;
   }
+
+  .btn-login{
+    margin: 32px 32px !important;
+  }
+
+  .btn-login .v-btn{
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  .v-card__actions{
+    padding: 12px;
+  }
+  /*formulario inputs*/
   .v-input input {
       padding-left: 8px !important;
       color: #172B4D !important;
   }
 
-  .v-text-field.v-text-field--solo .v-input__control {
-    padding: 8px 0 !important;
-}
+  .v-application--is-ltr .v-text-field .v-input__prepend-inner {
+    margin-right: auto;
+  }
+  /*alerts de erro*/
+   .v-text-field.v-text-field--enclosed .v-text-field__details {
+      padding: 8px 0px !important;
+      margin-bottom: 16px;
+  }
 </style>

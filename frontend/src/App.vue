@@ -2,18 +2,13 @@
   <v-app>
     <v-main style="overflow: hidden auto; height: 0px;" class="white">
       <router-view />
-      <Login/>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import Login from './views/Login';
 export default {
   name: 'App',
-  components: {
-    Login,
-  },
   data () {
     return {
       //
